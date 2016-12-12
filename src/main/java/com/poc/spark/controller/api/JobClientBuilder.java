@@ -3,14 +3,12 @@ package com.poc.spark.controller.api;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static com.poc.spark.controller.api.InvokeType.*;
 
 /**
  * Created by fcamara
@@ -25,20 +23,20 @@ public final class JobClientBuilder {
    * Creates a new builder that will automatically load the Spark configuration
    * from the classpath.
    */
-  public JobClientBuilder(InvokeType invokeType) throws IOException {
-    this(true, invokeType);
+  public JobClientBuilder( InvokeType invokeType ) throws IOException {
+    this( true, invokeType );
   }
 
-  public JobClientBuilder(boolean loadDefaults, InvokeType invokeType) throws IOException {
+  public JobClientBuilder( boolean loadDefaults, InvokeType invokeType ) throws IOException {
     this.config = new Properties();
     this.invokeType = invokeType;
 
-    if (loadDefaults) {
-      URL url = classLoader().getResource(SPARK_CONF);
-      if (url != null) {
-        Reader r = new InputStreamReader(url.openStream(), UTF_8);
+    if ( loadDefaults ) {
+      URL url = classLoader().getResource( SPARK_CONF );
+      if ( url != null ) {
+        Reader r = new InputStreamReader( url.openStream(), UTF_8 );
         try {
-          config.load(r);
+          config.load( r );
         } finally {
           r.close();
         }
@@ -46,34 +44,33 @@ public final class JobClientBuilder {
     }
   }
 
-  public JobClientBuilder setConf(String key, String value) {
-    if (value != null) {
-      config.setProperty(key, value);
+  public JobClientBuilder setConf( String key, String value ) {
+    if ( value != null ) {
+      config.setProperty( key, value );
     } else {
-      config.remove(key);
+      config.remove( key );
     }
     return this;
   }
 
-  public JobClientBuilder setAll(Map<String, String> props) {
-    config.putAll(props);
+  public JobClientBuilder setAll( Map<String, String> props ) {
+    config.putAll( props );
     return this;
   }
 
-  public JobClientBuilder setAll(Properties props) {
-    config.putAll(props);
+  public JobClientBuilder setAll( Properties props ) {
+    config.putAll( props );
     return this;
   }
 
   public JobClient build() {
     JobClient client = null;
-    ServiceLoader<JobClientFactory> loader = ServiceLoader.load(JobClientFactory.class,
-        classLoader());
-    if (!loader.iterator().hasNext()) {
-      throw new IllegalStateException("No Clients implementation was found.");
+    ServiceLoader<JobClientFactory> loader = ServiceLoader.load( JobClientFactory.class, classLoader() );
+    if ( !loader.iterator().hasNext() ) {
+      throw new IllegalStateException( "No Clients implementation was found." );
     }
 
-    for (JobClientFactory factory : loader) {
+    for ( JobClientFactory factory : loader ) {
       try {
         client = factory.createClient( invokeType, config );
       } catch ( Exception e ) {
@@ -91,7 +88,7 @@ public final class JobClientBuilder {
 
   private ClassLoader classLoader() {
     ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    if (cl == null) {
+    if ( cl == null ) {
       cl = getClass().getClassLoader();
     }
     return cl;

@@ -7,11 +7,11 @@ public interface ConfEntry {
   /**
    * Property key
    */
-  public String key();
+  String key();
 
   /**
    * Property default value. Types:
-   * String, Integer, Long, Boolean.
+   * String, Integer, Long, Boolean ...
    */
-  public Object defaultValue();
+  Object defaultValue();
 }

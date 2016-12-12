@@ -1,10 +1,9 @@
 package com.poc.spark.controller.api;
 
-import java.util.List;
 import java.util.concurrent.Future;
 
 /**
- * Created by fcamara 
+ * Created by fcamara
  * A handle to a submitted job. Allows for monitoring and controlling of the running remote job.
  */
 public interface JobHandle<T> extends Future<T> {
@@ -20,18 +19,13 @@ public interface JobHandle<T> extends Future<T> {
    *
    * @param l The listener to add.
    */
-  void addListener(Listener<T> l);
+  void addListener( Listener<T> l );
 
   /**
    * The current state of the submitted job.
    */
   static enum State {
-    SENT,
-    QUEUED,
-    STARTED,
-    CANCELLED,
-    FAILED,
-    SUCCEEDED;
+    SENT, QUEUED, STARTED, CANCELLED, FAILED, SUCCEEDED;
   }
 
   /**
@@ -45,15 +39,15 @@ public interface JobHandle<T> extends Future<T> {
      * possible for jobs to bypass this state and got directly from the SENT state to the STARTED
      * state.
      */
-    void onJobQueued(JobHandle<T> job);
+    void onJobQueued( JobHandle<T> job );
 
-    void onJobStarted(JobHandle<T> job);
+    void onJobStarted( JobHandle<T> job );
 
-    void onJobCancelled(JobHandle<T> job);
+    void onJobCancelled( JobHandle<T> job );
 
-    void onJobFailed(JobHandle<T> job, Throwable cause);
+    void onJobFailed( JobHandle<T> job, Throwable cause );
 
-    void onJobSucceeded(JobHandle<T> job, T result);
+    void onJobSucceeded( JobHandle<T> job, T result );
 
   }
 

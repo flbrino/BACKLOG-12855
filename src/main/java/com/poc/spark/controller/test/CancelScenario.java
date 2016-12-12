@@ -1,4 +1,4 @@
-package com.poc.spark.controller.example;
+package com.poc.spark.controller.test;
 
 import com.poc.spark.controller.api.JobClient;
 import com.poc.spark.controller.api.JobClientBuilder;
@@ -32,16 +32,20 @@ public class CancelScenario {
     try {
       run( new ThreadInvokeFunction() {
         private JobClient client;
-        public void setClient (JobClient client) {
+
+        public void setClient( JobClient client ) {
           this.client = client;
         }
+
         @Override void call( JobClient client ) throws Exception {
           client.submit( new SparkSubmitJob( applicationName, applicationJar, applicationMainClass, applicationArgs ) );
         }
-        @Override public void run(){
-          try{
+
+        @Override public void run() {
+          try {
             call( client );
-          }catch ( Exception e ) {}
+          } catch ( Exception e ) {
+          }
         }
       } );
     } catch ( Exception e ) {
@@ -65,14 +69,13 @@ public class CancelScenario {
       throw e;
     } finally {
       if ( client != null ) {
-        client.stopProcess( );
+        client.stopProcess();
       }
     }
   }
 
   private static String[] setArgs() {
-    return new String[] { "VisualSparkRunningWordCount",
-        "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar",
+    return new String[] { "VisualSparkRunningWordCount", "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar",
         "org.pentaho.di.spark.VisualSpark",
         "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/wordcount/wordcount.ktr" };
 
@@ -97,8 +100,6 @@ public class CancelScenario {
         applicationArgs[i - 3] = args[i];
       }
     }
-
-
 
     new CancelScenario( applicationName, applicationJar, applicationMainClass, applicationArgs ).run();
 

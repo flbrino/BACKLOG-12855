@@ -22,15 +22,19 @@ public class SparkSubmitMonitor implements SparkAppHandle.Listener {
   }
 
   @Override public void stateChanged( SparkAppHandle sparkAppHandle ) {
-    LOG.info("Spark App Id [" + sparkAppHandle.getAppId() + "] State Changed.  State [" + sparkAppHandle.getState() + "]");
-    System.out.println("Spark App Id [" + sparkAppHandle.getAppId() + "] State Changed.  State [" + sparkAppHandle.getState() + "]");
+    LOG.info(
+        "Spark App Id [" + sparkAppHandle.getAppId() + "] State Changed.  State [" + sparkAppHandle.getState() + "]" );
+    System.out.println(
+        "Spark App Id [" + sparkAppHandle.getAppId() + "] State Changed.  State [" + sparkAppHandle.getState() + "]" );
     applicationState = sparkAppHandle.getState();
   }
 
   @Override public void infoChanged( SparkAppHandle sparkAppHandle ) {
-    LOG.info("Spark App Id [" + sparkAppHandle.getAppId() + "] Info Changed.  State [" + sparkAppHandle.getState() + "]");
-    System.out.println("Spark App Id [" + sparkAppHandle.getAppId() + "] Info Changed.  State [" + sparkAppHandle.getState() + "]");
-    if(sparkAppHandle.getAppId() != null && !sparkAppHandle.getAppId().isEmpty() && applicationID == null) {
+    LOG.info(
+        "Spark App Id [" + sparkAppHandle.getAppId() + "] Info Changed.  State [" + sparkAppHandle.getState() + "]" );
+    System.out.println(
+        "Spark App Id [" + sparkAppHandle.getAppId() + "] Info Changed.  State [" + sparkAppHandle.getState() + "]" );
+    if ( sparkAppHandle.getAppId() != null && !sparkAppHandle.getAppId().isEmpty() && applicationID == null ) {
       this.applicationID = sparkAppHandle.getAppId();
     }
   }

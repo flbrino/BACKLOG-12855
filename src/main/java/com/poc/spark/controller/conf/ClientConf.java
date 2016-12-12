@@ -1,7 +1,7 @@
 package com.poc.spark.controller.conf;
 
 /**
- * Created by fcamara 
+ * Created by fcamara
  */
 
 import java.util.HashMap;
@@ -18,8 +18,7 @@ import java.util.regex.Pattern;
  * Created by fcamara
  * Base class with common functionality for type-safe configuration objects.
  */
-public abstract class ClientConf<T extends ClientConf>
-    implements Iterable<Map.Entry<String, String>> {
+public abstract class ClientConf<T extends ClientConf> implements Iterable<Map.Entry<String, String>> {
 
   private static final Map<String, TimeUnit> TIME_SUFFIXES;
 
@@ -49,20 +48,17 @@ public abstract class ClientConf<T extends ClientConf>
     return config.get( key );
   }
 
-  @SuppressWarnings( "unchecked" )
-  public T set( String key, String value ) {
+  @SuppressWarnings( "unchecked" ) public T set( String key, String value ) {
     config.put( key, value );
     return (T) this;
   }
 
-  @SuppressWarnings( "unchecked" )
-  public T setIfMissing( String key, String value ) {
+  @SuppressWarnings( "unchecked" ) public T setIfMissing( String key, String value ) {
     config.putIfAbsent( key, value );
     return (T) this;
   }
 
-  @SuppressWarnings( "unchecked" )
-  public T setAll( com.poc.spark.controller.common.ClientConf<?> other ) {
+  @SuppressWarnings( "unchecked" ) public T setAll( com.poc.spark.controller.common.ClientConf<?> other ) {
     for ( Map.Entry<String, String> e : other ) {
       set( e.getKey(), e.getValue() );
     }
@@ -104,7 +100,8 @@ public abstract class ClientConf<T extends ClientConf>
   public long getTimeAsMs( ConfEntry e ) {
     String time = get( e, String.class );
     if ( time == null ) {
-      check( e.defaultValue() != null, "ConfEntry %s doesn't have a default value, cannot convert to time value.", e.key() );
+      check( e.defaultValue() != null, "ConfEntry %s doesn't have a default value, cannot convert to time value.",
+          e.key() );
       time = (String) e.defaultValue();
     }
 
@@ -123,8 +120,7 @@ public abstract class ClientConf<T extends ClientConf>
     return TimeUnit.MILLISECONDS.convert( val, suffix != null ? TIME_SUFFIXES.get( suffix ) : TimeUnit.MILLISECONDS );
   }
 
-  @SuppressWarnings( "unchecked" )
-  public T set( ConfEntry e, Object value ) {
+  @SuppressWarnings( "unchecked" ) public T set( ConfEntry e, Object value ) {
     check( typesMatch( value, e.defaultValue() ), "Value doesn't match configuration entry type for %s.", e.key() );
     if ( value == null ) {
       config.remove( e.key() );
@@ -134,8 +130,7 @@ public abstract class ClientConf<T extends ClientConf>
     return (T) this;
   }
 
-  @Override
-  public Iterator<Map.Entry<String, String>> iterator() {
+  @Override public Iterator<Map.Entry<String, String>> iterator() {
     return config.entrySet().iterator();
   }
 

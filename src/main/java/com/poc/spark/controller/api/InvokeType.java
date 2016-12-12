@@ -5,13 +5,15 @@ package com.poc.spark.controller.api;
  */
 public enum InvokeType {
 
-  SPARK_SUBMIT("spark-subit");
+  SPARK_SUBMIT( "spark-submit" );
 
   private final String key;
 
-  private InvokeType(String key) {
+  InvokeType( String key ) {
     this.key = key;
   }
 
-  public String getKey() { return key; }
+  public String getKey() {
+    return key;
+  }
 }

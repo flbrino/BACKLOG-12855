@@ -1,12 +1,13 @@
-package com.poc.spark.controller.example;
+package com.poc.spark.controller.test;
 
 import com.poc.spark.controller.api.JobClient;
 
 /**
  * Created by fcamara
  */
-public abstract class ThreadInvokeFunction implements Runnable{
+public abstract class ThreadInvokeFunction implements Runnable {
 
-    abstract void call( JobClient client ) throws Exception;
-    abstract void setClient (JobClient client);
+  abstract void call( JobClient client ) throws Exception;
+
+  abstract void setClient( JobClient client );
 }

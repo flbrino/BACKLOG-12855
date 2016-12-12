@@ -7,6 +7,6 @@ import java.util.Properties;
  */
 public interface JobClientFactory {
 
-  JobClient createClient(InvokeType invokeType, Properties config);
+  JobClient createClient( InvokeType invokeType, Properties config );
 
 }

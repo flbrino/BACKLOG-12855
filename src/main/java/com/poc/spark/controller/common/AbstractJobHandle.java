@@ -2,7 +2,6 @@ package com.poc.spark.controller.common;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.poc.spark.controller.api.JobHandle;
 
@@ -19,30 +18,27 @@ public abstract class AbstractJobHandle<T> implements JobHandle<T> {
     this.state = State.SENT;
   }
 
-  @Override
-  public State getState() {
+  @Override public State getState() {
     return state;
   }
 
-  @Override
-  public void addListener(Listener<T> l) {
-    synchronized (listeners) {
-      listeners.add(l);
-      fireStateChange(state, l);
+  @Override public void addListener( Listener<T> l ) {
+    synchronized ( listeners ) {
+      listeners.add( l );
+      fireStateChange( state, l );
     }
   }
 
   /**
    * Changes the state of this job handle
    * Fires events appropriately.
-   *
    */
-  public boolean changeState(State newState) {
-    synchronized (listeners) {
-      if (newState.ordinal() > state.ordinal() && state.ordinal() < State.CANCELLED.ordinal()) {
+  public boolean changeState( State newState ) {
+    synchronized ( listeners ) {
+      if ( newState.ordinal() > state.ordinal() && state.ordinal() < State.CANCELLED.ordinal() ) {
         state = newState;
-        for (Listener<T> l : listeners) {
-          fireStateChange(newState, l);
+        for ( Listener<T> l : listeners ) {
+          fireStateChange( newState, l );
         }
         return true;
       }
@@ -51,30 +47,31 @@ public abstract class AbstractJobHandle<T> implements JobHandle<T> {
   }
 
   protected abstract T result();
+
   protected abstract Throwable error();
 
-  private void fireStateChange(State s, Listener<T> l) {
-    switch (s) {
+  private void fireStateChange( State s, Listener<T> l ) {
+    switch ( s ) {
       case SENT:
         break;
       case QUEUED:
-        l.onJobQueued(this);
+        l.onJobQueued( this );
         break;
       case STARTED:
-        l.onJobStarted(this);
+        l.onJobStarted( this );
         break;
       case CANCELLED:
-        l.onJobCancelled(this);
+        l.onJobCancelled( this );
         break;
       case FAILED:
-        l.onJobFailed(this, error());
+        l.onJobFailed( this, error() );
         break;
       case SUCCEEDED:
         try {
-          l.onJobSucceeded(this, result());
-        } catch (Exception e) {
+          l.onJobSucceeded( this, result() );
+        } catch ( Exception e ) {
           // Shouldn't really happen.
-          throw new IllegalStateException(e);
+          throw new IllegalStateException( e );
         }
         break;
       default:

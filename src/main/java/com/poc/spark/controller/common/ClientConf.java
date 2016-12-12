@@ -14,8 +14,7 @@ import java.util.regex.Pattern;
  * Created by fcamara
  * Base class with common functionality for type-safe configuration objects.
  */
-public abstract class ClientConf<T extends ClientConf>
-    implements Iterable<Map.Entry<String, String>> {
+public abstract class ClientConf<T extends ClientConf> implements Iterable<Map.Entry<String, String>> {
 
   public static interface ConfEntry {
 
@@ -114,7 +113,8 @@ public abstract class ClientConf<T extends ClientConf>
   public long getTimeAsMs( ConfEntry e ) {
     String time = get( e, String.class );
     if ( time == null ) {
-      check( e.defaultValue() != null, "ConfEntry %s doesn't have a default value, cannot convert to time value.", e.key() );
+      check( e.defaultValue() != null, "ConfEntry %s doesn't have a default value, cannot convert to time value.",
+          e.key() );
       time = (String) e.defaultValue();
     }
 

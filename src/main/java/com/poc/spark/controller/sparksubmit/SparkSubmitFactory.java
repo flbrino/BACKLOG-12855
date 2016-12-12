@@ -15,10 +15,10 @@ import static com.poc.spark.controller.api.InvokeType.*;
  * Created by fcamara
  */
 public class SparkSubmitFactory implements JobClientFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(SparkSubmitFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger( SparkSubmitFactory.class );
 
   @Override public JobClient createClient( InvokeType invokeType, Properties config ) {
-    if(invokeType == null || !SPARK_SUBMIT.getKey().equals( invokeType.getKey() ) ) {
+    if ( invokeType == null || !SPARK_SUBMIT.getKey().equals( invokeType.getKey() ) ) {
       return null;
     }
 

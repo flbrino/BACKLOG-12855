@@ -1,5 +1,6 @@
-package com.poc.spark.controller.example;
+package com.poc.spark.controller.test;
 
+import com.poc.spark.controller.api.ApplicationHandle;
 import com.poc.spark.controller.api.JobClient;
 import com.poc.spark.controller.api.JobClientBuilder;
 import com.poc.spark.controller.sparksubmit.SparkSubmitJob;
@@ -32,7 +33,19 @@ public class VisualSparkWordCountTest {
     try {
       run( new InvokeFunction() {
         @Override void call( JobClient client ) throws Exception {
-          client.submit( new SparkSubmitJob( applicationName, applicationJar, applicationMainClass, applicationArgs ) );
+          ApplicationHandle
+              handler =
+              client.submit(
+                  new SparkSubmitJob( applicationName, applicationJar, applicationMainClass, applicationArgs ) );
+          //wait for process
+          try {
+            while ( handler.isAlive() ) {
+              Thread.sleep( 20000 );
+            }
+          } catch ( Exception e ) {
+            /*ignore*/
+          }
+
         }
       } );
     } catch ( Exception e ) {
@@ -51,14 +64,13 @@ public class VisualSparkWordCountTest {
       throw e;
     } finally {
       if ( client != null ) {
-        client.stopProcess( );
+        client.stopProcess();
       }
     }
   }
 
   private static String[] setArgs() {
-    return new String[] { "VisualSparkRunningWordCount",
-        "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar",
+    return new String[] { "VisualSparkRunningWordCount", "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar",
         "org.pentaho.di.spark.VisualSpark",
         "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/wordcount/wordcount.ktr" };
 
@@ -83,8 +95,6 @@ public class VisualSparkWordCountTest {
         applicationArgs[i - 3] = args[i];
       }
     }
-
-
 
     new VisualSparkWordCountTest( applicationName, applicationJar, applicationMainClass, applicationArgs ).run();
 

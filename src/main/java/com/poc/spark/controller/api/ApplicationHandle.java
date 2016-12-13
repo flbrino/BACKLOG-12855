@@ -19,4 +19,6 @@ public interface ApplicationHandle {
 
   void processSparkLog();
 
+  void freeResources();
+
 }

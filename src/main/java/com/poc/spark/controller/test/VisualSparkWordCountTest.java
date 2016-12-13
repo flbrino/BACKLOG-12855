@@ -19,13 +19,19 @@ public class VisualSparkWordCountTest {
   private String applicationName = null;
   private String applicationJar = null;
   private String applicationMainClass = null;
+  private boolean iskerberos = false;
+  private String serverUser = null;
+  private String keytab = null;
   private String[] applicationArgs = null;
 
   public VisualSparkWordCountTest( String applicationName, String applicationJar, String applicationMainClass,
-      String[] applicationArgs ) {
+      boolean kerberos, String serverUser, String keytab, String[] applicationArgs ) {
     this.applicationName = applicationName;
     this.applicationJar = applicationJar;
     this.applicationMainClass = applicationMainClass;
+    this.iskerberos = kerberos;
+    this.serverUser = serverUser;
+    this.keytab = keytab;
     this.applicationArgs = applicationArgs;
   }
 
@@ -36,7 +42,8 @@ public class VisualSparkWordCountTest {
           ApplicationHandle
               handler =
               client.submit(
-                  new SparkSubmitJob( applicationName, applicationJar, applicationMainClass, applicationArgs ) );
+                  new SparkSubmitJob( applicationName, applicationJar, applicationMainClass, iskerberos,  serverUser,
+                      keytab, applicationArgs ) );
           //wait for process
           try {
             while ( handler.isAlive() ) {
@@ -45,7 +52,8 @@ public class VisualSparkWordCountTest {
           } catch ( Exception e ) {
             /*ignore*/
           }
-
+          handler.processSparkLog();
+          handler.freeResources();
         }
       } );
     } catch ( Exception e ) {
@@ -69,34 +77,52 @@ public class VisualSparkWordCountTest {
     }
   }
 
+  //easy testing
   private static String[] setArgs() {
-    return new String[] { "VisualSparkRunningWordCount", "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar",
-        "org.pentaho.di.spark.VisualSpark",
-        "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/wordcount/wordcount.ktr" };
+    String applicationName = "VisualSparkRunningWordCount";
+    String applicationJar = "file:/c://TestNoLibs/pentaho-spark-TRUNK-SNAPSHOT.jar";
+    String applicationMainClass = "org.pentaho.di.spark.VisualSpark";
+    String applicationArgs = "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/wordcount/wordcount.ktr";
+    String kerberos = "true";
+    String serverUser = "devuser@PENTAHOQA.COM";
+    String keytab = "C://Users/fcamara/devuser_pentahoqa.keytab";
+
+    return new String[] { applicationName, applicationJar, applicationMainClass, kerberos, serverUser,
+        keytab, applicationArgs };
 
   }
 
   public static void main( String[] args ) {
-    args = setArgs();
-    if ( args.length < 3 ) {
-      System.out.println( "Wrong number of arguments" );
-      System.out.println(
-          "VisualSparkWordCountTest [applicationName] [applicationJar] [applicationMainClass] [applicationArgs1] ..." );
+    String[] argsAux = args;
+    if ( argsAux == null || argsAux.length == 0 ) {
+      argsAux = setArgs();
     }
 
-    String applicationName = args[0];
-    String applicationJar = args[1];
-    String applicationMainClass = args[2];
+    if ( argsAux.length < 4 ) {
+      System.out.println( "Wrong number of arguments" );
+    }
+
+    String applicationName = argsAux[0];
+    String applicationJar = argsAux[1];
+    String applicationMainClass = argsAux[2];
+    boolean kerberos = "true".equals( argsAux[3] );
+    String serverUser = null;
+    String keytab = null;
+    int fixedArgssize = 6;
+    if ( kerberos ) {
+      fixedArgssize = 4;
+      serverUser = argsAux[4];
+      keytab = argsAux[5];
+    }
 
     String[] applicationArgs = null;
-    if ( args.length > 3 ) {
-      applicationArgs = new String[args.length - 3];
-      for ( int i = 3; i < args.length; i++ ) {
-        applicationArgs[i - 3] = args[i];
+    if ( argsAux.length > fixedArgssize ) {
+      applicationArgs = new String[argsAux.length - fixedArgssize];
+      for ( int i = fixedArgssize; i < argsAux.length; i++ ) {
+        applicationArgs[i - fixedArgssize] = argsAux[i];
       }
     }
-
-    new VisualSparkWordCountTest( applicationName, applicationJar, applicationMainClass, applicationArgs ).run();
-
+    new VisualSparkWordCountTest( applicationName, applicationJar, applicationMainClass, kerberos, serverUser, keytab,
+        applicationArgs ).run();
   }
 }

@@ -1,6 +1,7 @@
 package com.poc.spark.controller.sparksubmit;
 
 import com.poc.spark.controller.api.ApplicationHandle;
+import com.poc.spark.controller.common.EnvironmentProperty;
 import com.poc.spark.controller.hdfsutil.HdfsService;
 import com.poc.spark.controller.hdfsutil.NamedCluster;
 import com.poc.spark.controller.conf.KettleConf;
@@ -26,6 +27,7 @@ public class SparkProcess implements ApplicationHandle {
   private final KettleConf conf;
   private final SparkAppHandle sparkAppHandle;
   private final SparkSubmitMonitor monitor;
+  private final SparkSubmitJob job;
   private final File tempDirectory;
 
   public String getApplicationID() {
@@ -36,17 +38,19 @@ public class SparkProcess implements ApplicationHandle {
     return monitor.getApplicationState().toString();
   }
 
-  public SparkProcess( KettleConf conf, final SparkAppHandle sparkAppHandle, File tempDirectoyr ) {
+  public SparkProcess( KettleConf conf, final SparkAppHandle sparkAppHandle, SparkSubmitJob job ) {
     this.conf = conf;
     this.sparkAppHandle = sparkAppHandle;
-    this.tempDirectory = tempDirectoyr;
+    this.tempDirectory = job.getTempDirectory();
     this.monitor = new SparkSubmitMonitor();
+    this.job = job;
+
     sparkAppHandle.addListener( monitor );
   }
 
   public void kill() {
     sparkAppHandle.kill();
-    freeResource();
+    freeResources();
 
     if ( sparkAppHandle.getState().isFinal() ) {
       return;
@@ -72,10 +76,10 @@ public class SparkProcess implements ApplicationHandle {
     } catch ( Exception e ) {
       /*ignore*/
     }
-    freeResource();
+    freeResources();
   }
 
-  private void freeResource() {
+  public void freeResources() {
     //delete spark default conf file
     try {
       if ( tempDirectory != null && tempDirectory.exists() ) {
@@ -114,13 +118,13 @@ public class SparkProcess implements ApplicationHandle {
   }
 
   private NamedCluster getNamedCluster() {
-    NamedCluster namedCluster = new NamedCluster( "CDH 58" );
+    NamedCluster namedCluster = new NamedCluster( "Cluster", job.isKerberos(), job.getServerUser(), job.getKeytab() );
     namedCluster.setHadoopConfDir(
-        "C:\\@work\\25\\pdi-ee-client-7.0.0.0\\data-integration\\plugins\\pentaho-big-data-plugin\\hadoop-configurations\\cdh58" );
-    namedCluster.setSparkClient( "C:\\Tools\\spark-2.0.1-bin-hadoop2.7" );
-    namedCluster.setSparkHome( "/opt/pentaho/spark" );
-    namedCluster.setSparkHomeLib( "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/fcamara/sparkLib" );
-    namedCluster.setPdiHome( "C:\\@work\\25\\pdi-ee-client-7.0.0.0" );
+        conf.get( EnvironmentProperty.HADOOP_CONF_DIR_ENV ));
+    namedCluster.setSparkClient( conf.get( EnvironmentProperty.SPARK_HOME_ENV ) );
+    namedCluster.setSparkHome( conf.get( EnvironmentProperty.SPARK_LIBS_ON_CLUSTER_ENV ) );
+    namedCluster.setSparkHomeLib( conf.get( EnvironmentProperty.SPARK_HOME_ON_CLUSTER_ENV ) );
+    namedCluster.setPdiHome( conf.get( EnvironmentProperty.PDI_HOME_ENV ) );
     return namedCluster;
   }
 

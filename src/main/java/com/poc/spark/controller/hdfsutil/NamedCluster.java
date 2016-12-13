@@ -34,53 +34,62 @@ public class NamedCluster {
   private String jarFile;
   private String mainClass;
 
-  public NamedCluster(String name) {
+  private boolean kerberos;
+  private String serverUser;
+  private String keytab = null;
+
+  public NamedCluster( String name, boolean kerberos, String serverUser, String keytab ) {
     this.id = UUID.randomUUID().toString();
     this.name = name;
     this.overrides = new HashMap<>();
+    this.kerberos = kerberos;
+    this.serverUser = serverUser;
+    this.keytab = keytab;
   }
 
-  public Configuration configuration() throws IOException{
+  public Configuration configuration() throws IOException {
     Configuration config = new Configuration();
     // Add Original Configuration
-    if (hadoopConfDir != null) {
-      addResource(config, "core-site.xml");
-      addResource(config, "hbase-site.xml");
-      addResource(config, "hdfs-site.xml");
-      addResource(config, "hive-site.xml");
-      addResource(config, "mapred-site.xml");
-      addResource(config, "yarn-site.xml");
+    if ( hadoopConfDir != null ) {
+      addResource( config, "core-site.xml" );
+      addResource( config, "hbase-site.xml" );
+      addResource( config, "hdfs-site.xml" );
+      addResource( config, "hive-site.xml" );
+      addResource( config, "mapred-site.xml" );
+      addResource( config, "yarn-site.xml" );
     }
 
     // Add Overrides
-    for (String key : overrides.keySet()) {
-      config.set(key, overrides.get(key));
+    for ( String key : overrides.keySet() ) {
+      config.set( key, overrides.get( key ) );
     }
 
-    org.apache.hadoop.conf.Configuration conf = new
-        org.apache.hadoop.conf.Configuration();
-    conf.set("hadoop.security.authentication", "Kerberos");
-    UserGroupInformation.setConfiguration(conf);
-    UserGroupInformation.loginUserFromKeytab("devuser@PENTAHOQA.COM", "C://Users/fcamara/devuser_pentahoqa.keytab");
+    //remove
+    org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
+    if ( kerberos ) {
+      conf.set( "hadoop.security.authentication", "Kerberos" );
+      UserGroupInformation.setConfiguration( conf );
+      UserGroupInformation.loginUserFromKeytab( serverUser, keytab );
+    }
     return config;
   }
 
-  private void addResource(Configuration config, String filename) {
+  private void addResource( Configuration config, String filename ) {
     try {
-      File file = new File(hadoopConfDir, filename);
-      InputStream inputStream = new FileInputStream(file);
-      config.addResource(inputStream);
-    } catch (IOException e) {
-      throw new RuntimeException("Unablee to add " + filename + " to Hadoop Configuration.", e);
+      File file = new File( hadoopConfDir, filename );
+      InputStream inputStream = new FileInputStream( file );
+      config.addResource( inputStream );
+    } catch ( IOException e ) {
+      throw new RuntimeException( "Unablee to add " + filename + " to Hadoop Configuration.", e );
     }
   }
 
   public Path sparkHomePath() {
-    return new Path(sparkHome);
+    return new Path( sparkHome );
   }
 
   public File pdiHomeFile() {
-    return new File(pdiHome);
+    return new File( pdiHome );
   }
 
   //<editor-fold desc="Getters & Setters">
@@ -92,7 +101,7 @@ public class NamedCluster {
     return name;
   }
 
-  public void setName(String name) {
+  public void setName( String name ) {
     this.name = name;
   }
 
@@ -100,7 +109,7 @@ public class NamedCluster {
     return hadoopConfDir;
   }
 
-  public void setHadoopConfDir(String hadoopConfDir) {
+  public void setHadoopConfDir( String hadoopConfDir ) {
     this.hadoopConfDir = hadoopConfDir;
   }
 
@@ -108,7 +117,7 @@ public class NamedCluster {
     return sparkClient;
   }
 
-  public void setSparkClient(String sparkClient) {
+  public void setSparkClient( String sparkClient ) {
     this.sparkClient = sparkClient;
   }
 
@@ -116,7 +125,7 @@ public class NamedCluster {
     return overrides;
   }
 
-  public void setOverrides(Map<String, String> overrides) {
+  public void setOverrides( Map<String, String> overrides ) {
     this.overrides = overrides;
   }
 
@@ -124,7 +133,7 @@ public class NamedCluster {
     return sparkHome;
   }
 
-  public void setSparkHome(String sparkHome) {
+  public void setSparkHome( String sparkHome ) {
     this.sparkHome = sparkHome;
   }
 
@@ -132,7 +141,7 @@ public class NamedCluster {
     return sparkHomeLib;
   }
 
-  public void setSparkHomeLib(String sparkHomeLib) {
+  public void setSparkHomeLib( String sparkHomeLib ) {
     this.sparkHomeLib = sparkHomeLib;
   }
 
@@ -140,7 +149,7 @@ public class NamedCluster {
     return pdiHome;
   }
 
-  public void setPdiHome(String pdiHome) {
+  public void setPdiHome( String pdiHome ) {
     this.pdiHome = pdiHome;
   }
 
@@ -148,7 +157,7 @@ public class NamedCluster {
     return jarFile;
   }
 
-  public void setJarFile(String jarFile) {
+  public void setJarFile( String jarFile ) {
     this.jarFile = jarFile;
   }
 
@@ -156,7 +165,7 @@ public class NamedCluster {
     return mainClass;
   }
 
-  public void setMainClass(String mainClass) {
+  public void setMainClass( String mainClass ) {
     this.mainClass = mainClass;
   }
   //</editor-fold>

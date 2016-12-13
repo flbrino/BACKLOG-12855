@@ -16,13 +16,20 @@ public class SparkSubmitJob implements Job {
   private String applicationName;
   private String applicationJar;
   private String applicationMainClass;
+  private boolean kerberos = false;
+  private String serverUser = null;
+  private String keytab = null;
   private String[] args;
   private File tempDirectory;
 
-  public SparkSubmitJob( String applicationName, String applicationJar, String applicationMainClass, String[] args ) {
+  public SparkSubmitJob( String applicationName, String applicationJar, String applicationMainClass, boolean kerberos,
+      String serverUser, String keytab, String[] args ) {
     this.applicationName = applicationName;
     this.applicationJar = applicationJar;
     this.applicationMainClass = applicationMainClass;
+    this.kerberos = kerberos;
+    this.serverUser = serverUser;
+    this.keytab = keytab;
     this.args = args;
   }
 
@@ -51,5 +58,17 @@ public class SparkSubmitJob implements Job {
       tempDirectory = Files.createTempDir();
     }
     return tempDirectory;
+  }
+
+  public boolean isKerberos() {
+    return kerberos;
+  }
+
+  public String getServerUser() {
+    return serverUser;
+  }
+
+  public String getKeytab() {
+    return keytab;
   }
 }

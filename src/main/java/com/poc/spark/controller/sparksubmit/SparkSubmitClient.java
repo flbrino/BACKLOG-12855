@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.poc.spark.controller.conf.KettleConfEntry.*;
 import static com.poc.spark.controller.common.EnvironmentProperty.*;
@@ -22,8 +21,6 @@ import static com.poc.spark.controller.common.EnvironmentProperty.*;
  */
 public class SparkSubmitClient implements JobClient {
   private static final Logger LOG = LoggerFactory.getLogger( SparkSubmitClient.class );
-  private static final AtomicInteger EXECUTOR_GROUP_ID = new AtomicInteger();
-  private static final long TIMEOUT = 2 * 60 * 1000;
   private final KettleConf conf;
   private SparkProcess sparkApplication = null;
 
@@ -33,8 +30,6 @@ public class SparkSubmitClient implements JobClient {
 
   @Override public ApplicationHandle submit( Job job ) {
     try {
-      // Let the launcher go away when launcher in yarn cluster mode. This avoids keeping lots
-      // of "small" Java processes lingering on the Livy server node.
       //properties.setProperty(SPARK_YARN_SUBMIT_WAITAPPCOMPLETE.getKey(), "false");
 
       final File confFile = Utils.writeConfToFile( job.getTempDirectory(), conf );
@@ -50,7 +45,9 @@ public class SparkSubmitClient implements JobClient {
       launcher.setAppResource( job.getApplicationJar() );
       launcher.setPropertiesFile( confFile.getAbsolutePath() );
       launcher.setMainClass( job.getApplicationMainClass() );
-      launcher.addAppArgs( job.getArgs() );
+      if(job.getArgs() != null && job.getArgs().length > 0) {
+        launcher.addAppArgs( job.getArgs() );
+      }
       launcher.setVerbose( false );
 
       /*if (properties.getProperty("proxy_user") != null) {
@@ -59,7 +56,7 @@ public class SparkSubmitClient implements JobClient {
 
       Stopwatch stopwatch = Stopwatch.createStarted();
       SparkAppHandle sparkHandle = launcher.startApplication();
-      sparkApplication = new SparkProcess( conf, sparkHandle, job.getTempDirectory() );
+      sparkApplication = new SparkProcess( conf, sparkHandle, (SparkSubmitJob) job );
     } catch ( Exception e ) {
       LOG.error( e.getMessage(), e );
     }
@@ -69,7 +66,7 @@ public class SparkSubmitClient implements JobClient {
   public void stopProcess() {
     try {
       if ( sparkApplication != null && sparkApplication.isAlive() ) {
-        sparkApplication.kill();
+        sparkApplication.stop();
       }
     } catch ( Exception e ) {
       /*ignore*/

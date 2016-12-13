@@ -33,8 +33,6 @@ public abstract class ClientConf<T extends ClientConf> implements Iterable<Map.E
 
   private static final Map<String, TimeUnit> TIME_SUFFIXES;
 
-  public static final boolean TEST_MODE = Boolean.parseBoolean( System.getenv( "LIVY_TEST" ) );
-
   static {
     TIME_SUFFIXES = new HashMap<>();
     TIME_SUFFIXES.put( "us", TimeUnit.MICROSECONDS );

@@ -23,12 +23,12 @@ public final class JobClientBuilder {
    * Creates a new builder that will automatically load the Spark configuration
    * from the classpath.
    */
-  public JobClientBuilder( InvokeType invokeType ) throws IOException {
-    this( true, invokeType );
+  public JobClientBuilder( InvokeType invokeType, Properties config ) throws IOException {
+    this( true, invokeType, config );
   }
 
-  public JobClientBuilder( boolean loadDefaults, InvokeType invokeType ) throws IOException {
-    this.config = new Properties();
+  public JobClientBuilder( boolean loadDefaults, InvokeType invokeType, Properties config ) throws IOException {
+    this.config = config;
     this.invokeType = invokeType;
 
     if ( loadDefaults ) {

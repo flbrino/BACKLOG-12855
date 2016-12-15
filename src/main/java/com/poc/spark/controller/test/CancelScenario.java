@@ -64,7 +64,7 @@ public class CancelScenario {
   private void run( ThreadInvokeFunction invokeFunction ) throws Exception {
     JobClient client = null;
     try {
-      client = new JobClientBuilder( false, SPARK_SUBMIT ).build();
+      client = new JobClientBuilder( false, SPARK_SUBMIT, KettleDefaults.getKettleDefaults(null) ).build();
       // Wait for the context to be up before running the test.
       invokeFunction.setClient( client );
       new Thread( invokeFunction ).start();

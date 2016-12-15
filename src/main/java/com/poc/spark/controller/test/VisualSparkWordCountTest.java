@@ -23,6 +23,7 @@ public class VisualSparkWordCountTest {
   private String serverUser = null;
   private String keytab = null;
   private String[] applicationArgs = null;
+  private String eventLogDir = null;
 
   public VisualSparkWordCountTest( String applicationName, String applicationJar, String applicationMainClass,
       boolean kerberos, String serverUser, String keytab, String[] applicationArgs ) {
@@ -33,6 +34,12 @@ public class VisualSparkWordCountTest {
     this.serverUser = serverUser;
     this.keytab = keytab;
     this.applicationArgs = applicationArgs;
+
+    eventLogDir = null;
+    //Scenario that get's de spark event log via Rest API
+    eventLogDir = "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/spark/applicationHistory";
+    //not commented Scenario that get's de spark event log via HDFS
+    //eventLogDir = "hdfs://svqxbdcn6cdh58secure-n2.pentahoqa.com:8020/user/devuser/eventLog";
   }
 
   public void run() {
@@ -64,7 +71,7 @@ public class VisualSparkWordCountTest {
   private void run( InvokeFunction invokeFunction ) throws Exception {
     JobClient client = null;
     try {
-      client = new JobClientBuilder( false, SPARK_SUBMIT ).build();
+      client = new JobClientBuilder( false, SPARK_SUBMIT, KettleDefaults.getKettleDefaults(eventLogDir) ).build();
       // Wait for the context to be up before running the test.
       invokeFunction.call( client );
     } catch ( Exception e ) {
@@ -89,8 +96,9 @@ public class VisualSparkWordCountTest {
 
     return new String[] { applicationName, applicationJar, applicationMainClass, kerberos, serverUser,
         keytab, applicationArgs };
-
   }
+
+
 
   public static void main( String[] args ) {
     String[] argsAux = args;
@@ -108,9 +116,9 @@ public class VisualSparkWordCountTest {
     boolean kerberos = "true".equals( argsAux[3] );
     String serverUser = null;
     String keytab = null;
-    int fixedArgssize = 6;
+    int fixedArgssize = 4;
     if ( kerberos ) {
-      fixedArgssize = 4;
+      fixedArgssize = 6;
       serverUser = argsAux[4];
       keytab = argsAux[5];
     }

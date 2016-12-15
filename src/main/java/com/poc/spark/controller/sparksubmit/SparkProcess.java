@@ -101,18 +101,34 @@ public class SparkProcess implements ApplicationHandle {
   public void processSparkLog() {
     if ( conf.getBoolean( SPARK_EVENTLOG_ENABLED ) ) {
       String logDirectory = conf.get( SPARK_EVENTLOG_DIR );
-      String applicationID = logDirectory + "/" + getApplicationID();
-      if ( applicationID != null && applicationID.length() > 0 && !isAlive() ) {
-        HdfsService hdfsService = new HdfsService( getNamedCluster() );
-        if ( copyLogFiles( hdfsService, new Path( tempDirectory.getAbsolutePath() ), applicationID, 1 ) ) {
-          for ( File file : tempDirectory.listFiles() ) {
-            if ( file.isFile() && file.getName().startsWith( getApplicationID() ) && !file.getName()
-                .endsWith( ".crc" ) ) {
-              ArrayList<Event> sparkEvents = Event.toObject( file.getAbsolutePath() );
-              PrintEvents.print( sparkEvents );
-            }
+      if(logDirectory == null || logDirectory.endsWith( "/applicationHistory" )){ //is default history directory
+        //so lets get log files from REST API
+        try {//Get Spark Rest API
+          if ( SparkRestApiClient.getLogAndUnzip( getApplicationID(), conf.get( "SPARK_RST_API" ), tempDirectory ) ) {
+            processSparkLogFiles();
+          }
+        } catch(Exception e) {
+          LOG.error( e.getMessage(), e );
+        }
+      }
+      else {//Get From HDFS
+        String applicationID = logDirectory + "/" + getApplicationID();
+        if ( applicationID != null && applicationID.length() > 0 && !isAlive() ) {
+          HdfsService hdfsService = new HdfsService( getNamedCluster() );
+          if ( copyLogFiles( hdfsService, new Path( tempDirectory.getAbsolutePath() ), applicationID, 1 ) ) {
+            processSparkLogFiles();
           }
         }
+      }
+    }
+  }
+
+  private void processSparkLogFiles(){
+    for ( File file : tempDirectory.listFiles() ) {
+      if ( file.isFile() && file.getName().startsWith( getApplicationID() ) && !file.getName()
+          .endsWith( ".crc" ) &&  !file.getName().endsWith( ".zip" ) && !file.getName().endsWith( ".conf" )) {
+        ArrayList<Event> sparkEvents = Event.toObject( file.getAbsolutePath() );
+        PrintEvents.print( sparkEvents );
       }
     }
   }
@@ -132,7 +148,7 @@ public class SparkProcess implements ApplicationHandle {
     String aux = fileName + "_" + i;
     Path hdfsPath = new Path( aux );
     if ( hdfsService.exists( hdfsPath ) ) {
-      hdfsService.copyToLocalFile( true, hdfsPath, copyToPath );
+      hdfsService.copyToLocalFile( false, hdfsPath, copyToPath );
       copyLogFiles( hdfsService, copyToPath, fileName, i + 1 );
       return true;
     }
